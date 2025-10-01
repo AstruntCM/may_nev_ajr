@@ -32,13 +32,6 @@ source ~/ros2_ws/install/setup.bash
 ros2 launch ros2_cpp_template launch_example1.launch.py
 ```
 
-# Delete this part if you are using it as a template
-
-ROS 2 pacage template, to get started, use template by clicking on the Green button labeled [`Use this template`](https://github.com/sze-info/ros2_cpp_template/generate) / [`Create new repository`](https://github.com/sze-info/ros2_cpp_template/generate). 
-
-<p align="center"><img src="img/use_this_template01.png" width="60%" /></p>
-
-
 Let's assume 
 - your Github username is `mycoolusername`
 - your ROS 2 repo shold be `cool_ros2_package`
