@@ -17,7 +17,7 @@ git clone https://github.com/AstruntCM/may_nev_ajr.git
 cd ~/ros2_ws
 ```
 ``` r
-colcon build --packages-select ros2_cpp_template --symlink-install
+colcon build --packages-select may_nev_ajr --symlink-install
 ```
 
 <details>
@@ -29,21 +29,5 @@ source ~/ros2_ws/install/setup.bash
 </details>
 
 ``` r
-ros2 launch ros2_cpp_template launch_example1.launch.py
+ros2 launch may_nev_ajr launch_example1.launch.py
 ```
-
-Let's assume 
-- your Github username is `mycoolusername`
-- your ROS 2 repo shold be `cool_ros2_package`
-
-Replace everything in the cloned repo:
-
-- `ros2_cpp_template` >> `cool_ros2_package` (the folder was already renamed after `Use this template`)
-- `sze-info` >> `mycoolusername`
-- find all `todo` strings and fill the blanks
-
-The easiest way is VS code:
-
-<p align="center"><img src="img/replace01.png" width="60%" /></p>
-
-Now `colcon build` your ROS 2 package and you can start wokring.
