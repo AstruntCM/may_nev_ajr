@@ -13,8 +13,9 @@ def generate_launch_description():
             executable='trafficLight',
             name='trafficLight',
             parameters=[{
-                "redLightTime": 4.0,
-                "greenLightTime": 8.0
+                "greenLightTime": 3.0,
+                "yellowLightTime": 2.0,
+                "redLightTime": 3.0
             }]
         ),
         Node(
