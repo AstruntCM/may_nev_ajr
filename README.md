@@ -3,14 +3,16 @@ ROS 2 C++ package.  [![Static Badge](https://img.shields.io/badge/ROS_2-Humble-3
 
 ## Leírás
 A package kettő node-ból áll.
-A /trafficLight node egy közlekedési lámpát szimulál, amely hasonlóan váltja az állapotát, mint a valóságban.
-A /driver node egy autonóm járművet (teknőst) vezérel, mely a lámpa állapotához igazítja a sebességét:
+A `/trafficLight` node egy közlekedési lámpát szimulál, amely hasonlóan váltja az állapotát, mint a valóságban.
+
+A `/driver` node egy autonóm járművet (teknőst) vezérel, mely a lámpa állapotához igazítja a sebességét:
 - Ha zöld a lámpa, akkor teljes sebességgel halad
 - Ha zöld után vált sárgára a lámpa, akkor lassít
 - Ha piros a lámpa, akkor megáll
 - Ha piros után sárga a lámpa, akkor elkezd gyorsítani
 
 A teknős a megadott pontokon automatikusan megfordul és folytatja a mozgását.
+
 ROS2 Humble alatt minden futtatható.
 
 ## Packages and build
