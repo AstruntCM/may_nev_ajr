@@ -6,7 +6,7 @@ A package kettő node-ból áll.
 
 A `/trafficLight` node egy közlekedési lámpát szimulál, amely hasonlóan váltja az állapotát, mint a valóságban.
 
-A `/driver` node egy autonóm járművet (teknőst) vezérel, mely a lámpa állapotához igazítja a sebességét:
+A `/turtleDriver` node egy autonóm járművet (teknőst) vezérel, mely a lámpa állapotához igazítja a sebességét:
 - Ha zöld a lámpa, akkor teljes sebességgel halad
 - Ha zöld után vált sárgára a lámpa, akkor lassít
 - Ha piros a lámpa, akkor megáll
@@ -53,7 +53,7 @@ ros2 launch may_nev_ajr trafficDriver.launch.py
 ```mermaid
 graph LR;
     tl([ /trafficLight]):::red --> light[ /lightState<br/>std_msgs/String]:::light
-    light --> dr([ /driverNode]):::red
+    light --> dr([ /turtleDriver]):::red
     dr --> cmd[ /cmd_vel<br/>geometry_msgs/Twist]:::light
     cmd --> ts([ /turtlesim_node]):::red
     ts --> pose[ /turtle1/pose<br/>turtlesim/Pose]:::light
