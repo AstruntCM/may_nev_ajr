@@ -18,7 +18,7 @@ using namespace std::chrono_literals;
 
 class turtleDriver : public rclcpp::Node {
     public:
-        turtleDriver() : Node("turtleDriver"), lightState_("RED"), speed_(1.2), teleported_(false), turning_(false), currentY_(5.5), currentTheta_(0.0), targetTheta_(0.0) {
+        turtleDriver() : Node("turtleDriver"), lightState_("RED"), speed_(1.2), teleported_(false), turning_(false), currentX_(5.5), currentY_(5.5), currentTheta_(0.0), targetTheta_(0.0), turnCooldown_(false), cooldownCounter_(0) {
             teleportTurtle_ = this->create_client<turtlesim::srv::TeleportAbsolute>("/turtle1/teleport_absolute");
 
             setPen_ = this->create_client<turtlesim::srv::SetPen>("/turtle1/set_pen");
@@ -42,7 +42,7 @@ class turtleDriver : public rclcpp::Node {
     private:
         void disablePen() {
             if (!setPen_->wait_for_service(2s)) {
-                RCLCPP_WARN(this->get_logger(), "SetPen service not available!");
+                RCLCPP_WARN(this->get_logger(), "SetPen error!");
                 return;
             }
             
@@ -54,11 +54,18 @@ class turtleDriver : public rclcpp::Node {
             request->off = 1; 
             
             setPen_->async_send_request(request);
-            RCLCPP_INFO(this->get_logger(), "Pen disabled - no line drawing");
+            RCLCPP_INFO(this->get_logger(), "Pen disabled");
         }
 
         void moveTurtle() {
             geometry_msgs::msg::Twist cmd;
+            
+            if (cooldownCounter_ > 0) {
+                cooldownCounter_--;
+                if (cooldownCounter_ == 0) {
+                    turnCooldown_ = false;
+                }
+            }
             
             // Fordulás => megadott ponton
             if (turning_) {
@@ -68,14 +75,17 @@ class turtleDriver : public rclcpp::Node {
                 while (angle_diff > M_PI) angle_diff -= 2 * M_PI;
                 while (angle_diff < -M_PI) angle_diff += 2 * M_PI;
                 
-                if (std::abs(angle_diff) > 0.087) {  // 0.087 rad ≈ 5 fok
+                if (std::abs(angle_diff) > 0.1) {  // 0.1 rad => 5.7 fok
                     cmd.angular.z = (angle_diff > 0) ? 3.14 : -3.14;
                     cmd.linear.x = 0.0;
                 }
+
                 // Fordulás befejezése
                 else {
                     turning_ = false;
-                    cmd.linear.x = 1.0;
+                    turnCooldown_ = true;
+                    cooldownCounter_ = 15;  // 15 tick => 1.5 sec
+                    cmd.linear.x = 1.5;
                     cmd.angular.z = 0.0;
                     RCLCPP_INFO(this->get_logger(), "Turn completed");
                 }
@@ -83,8 +93,8 @@ class turtleDriver : public rclcpp::Node {
                 return;
             }
             
-            // Fal detektálás + fordulás indítása
-            if ((currentY_ > 9.5 || currentY_ < 1.5) && !turning_) {
+            // Fal detektálás + fordulás indítása 
+            if ((currentY_ > 9.0 || currentY_ < 2.0 || currentX_ > 9.0 || currentX_ < 2.0) && !turning_ && !turnCooldown_) {
                 cmd.linear.x = 0.0;
                 cmd.angular.z = 0.0;
                 turning_ = true;
@@ -93,7 +103,7 @@ class turtleDriver : public rclcpp::Node {
                 while (targetTheta_ > M_PI) targetTheta_ -= 2 * M_PI;
                 while (targetTheta_ < -M_PI) targetTheta_ += 2 * M_PI;
                 
-                RCLCPP_INFO(this->get_logger(), "Wall detected! Starting turn...");
+                RCLCPP_INFO(this->get_logger(), "Wall detected! Starting turn!");
                 pub_->publish(cmd);
                 return;
             }
@@ -105,7 +115,7 @@ class turtleDriver : public rclcpp::Node {
             else if (lightState_ == "YELLOW") {
                 cmd.linear.x = speed_ * 0.5;
             }
-            else {  // RED
+            else {  
                 cmd.linear.x = 0.0;
             }
             
@@ -115,6 +125,7 @@ class turtleDriver : public rclcpp::Node {
 
 
         void pose_callback(const turtlesim::msg::Pose::SharedPtr msg) {
+            currentX_ = msg->x;
             currentY_ = msg->y;
             currentTheta_ = msg->theta;
         }
@@ -124,7 +135,7 @@ class turtleDriver : public rclcpp::Node {
             if (teleported_) return;
 
             if (!teleportTurtle_->wait_for_service(2s)) {
-                RCLCPP_WARN(this->get_logger(), "Teleport service error!");
+                RCLCPP_WARN(this->get_logger(), "Teleport error!");
                 return;
             }
             
@@ -164,9 +175,12 @@ class turtleDriver : public rclcpp::Node {
         double speed_;
         bool teleported_;
         bool turning_;
+        double currentX_;
         double currentY_;
         double currentTheta_;
         double targetTheta_;
+        bool turnCooldown_;
+        int cooldownCounter_;
 };
 
 int main(int argc, char* argv[]) {
