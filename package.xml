@@ -3,7 +3,7 @@
 <package format="3">
   <name>may_nev_ajr</name>
   <version>0.0.0</version>
-  <description>Test</description>
+  <description>Traffic light simulation with autonomous turtle driver</description>
   <maintainer email="mayer.marton.balint@gmail.com"></maintainer>
   <license>GNU General Public License v3.0</license>
 
