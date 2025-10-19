@@ -18,7 +18,7 @@ using namespace std::chrono_literals;
 
 class turtleDriver : public rclcpp::Node {
     public:
-        turtleDriver() : Node("turtleDriver"), lightState_("RED"), speed_(1.2), teleported_(false), turning_(false), currentX_(5.5), currentY_(5.5), currentTheta_(0.0), targetTheta_(0.0), turnCooldown_(false), cooldownCounter_(0) {
+        turtleDriver() : Node("turtleDriver"), lightState_("RED"), speed_(0.8), teleported_(false), turning_(false), currentX_(5.5), currentY_(5.5), currentTheta_(0.0), targetTheta_(0.0), turnCooldown_(false), cooldownCounter_(0) {
             teleportTurtle_ = this->create_client<turtlesim::srv::TeleportAbsolute>("/turtle1/teleport_absolute");
 
             setPen_ = this->create_client<turtlesim::srv::SetPen>("/turtle1/set_pen");
@@ -33,7 +33,7 @@ class turtleDriver : public rclcpp::Node {
 
             timer_ = this->create_wall_timer(1s, std::bind(&turtleDriver::teleportTurtle, this));
 
-            timerM_ = this->create_wall_timer(100ms, std::bind(&turtleDriver::moveTurtle, this));
+            timerM_ = this->create_wall_timer(30ms, std::bind(&turtleDriver::moveTurtle, this));
             
             // Toll letiltás
             disablePen();
@@ -75,17 +75,16 @@ class turtleDriver : public rclcpp::Node {
                 while (angle_diff > M_PI) angle_diff -= 2 * M_PI;
                 while (angle_diff < -M_PI) angle_diff += 2 * M_PI;
                 
-                if (std::abs(angle_diff) > 0.1) {  // 0.1 rad => 5.7 fok
+                if (std::abs(angle_diff) > 0.1) {  // 0.1 rad
                     cmd.angular.z = (angle_diff > 0) ? 3.14 : -3.14;
                     cmd.linear.x = 0.0;
                 }
 
-                // Fordulás befejezése
                 else {
                     turning_ = false;
                     turnCooldown_ = true;
-                    cooldownCounter_ = 15;  // 15 tick => 1.5 sec
-                    cmd.linear.x = 1.5;
+                    cooldownCounter_ = 10;  
+                    cmd.linear.x = 0.8;  
                     cmd.angular.z = 0.0;
                     RCLCPP_INFO(this->get_logger(), "Turn completed");
                 }
@@ -108,7 +107,7 @@ class turtleDriver : public rclcpp::Node {
                 return;
             }
 
-            // Lámpa állapot alapján => sebesség álltítás
+            // Lámpa állapot alapján => sebesség állítás
             if (lightState_ == "GREEN") {
                 cmd.linear.x = speed_;
             }
@@ -142,7 +141,7 @@ class turtleDriver : public rclcpp::Node {
             auto request = std::make_shared<turtlesim::srv::TeleportAbsolute::Request>();
             request->x = 5.5; 
             request->y = 2.0; 
-            request->theta = 1.57;  // 90 fok (felfelé)
+            request->theta = 1.57;  
             
             teleportTurtle_->async_send_request(request);
             RCLCPP_INFO(this->get_logger(), "Turtle teleported to starting position");
